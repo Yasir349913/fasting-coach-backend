@@ -9,11 +9,10 @@ const { authMiddleware, adminOnly } = require('../middleware/authMiddlerware');
 
 const router = express.Router();
 
+router.route('/').get(getReviews);
 // Apply auth + admin middleware to all review routes
 router.use(authMiddleware, adminOnly);
-
-router.route('/').get(getReviews).post(addReview);
-
+router.route('/').post(addReview);
 router.route('/:id').patch(updateReview).delete(deleteReview);
 
 module.exports = router;
