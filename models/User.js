@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const { PAYMENT_STATUS, USER_ROLES } = require('../utils/enums');
 
-// Define schema
 const UserSchema = mongoose.Schema(
   {
     name: {

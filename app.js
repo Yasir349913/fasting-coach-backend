@@ -2,11 +2,12 @@ require('dotenv').config();
 const cors = require('cors');
 const morgan = require('morgan');
 const express = require('express');
-const connectDb = require('./db/connect');
+const connectDb = require('./config/db');
 
 const adminAuthRoutes = require('./routes/authRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const paymentplanRoutes = require('./routes/paymentPlanRoutes');
+const twilloRoutes = require('./routes/twilioRoutes');
 
 // Middlewares
 const app = express();
@@ -30,6 +31,7 @@ app.get('/', (req, res) => {
 app.use('/v1/auth', adminAuthRoutes);
 app.use('/v1/reviews', reviewRoutes);
 app.use('/v1/payment-plans', paymentplanRoutes);
+app.use('/v1/twilio', twilloRoutes);
 
 // Start Server
 let start = async () => {
