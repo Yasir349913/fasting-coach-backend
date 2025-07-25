@@ -1,9 +1,10 @@
 const { OpenAI } = require('openai');
 const { COACH_PROFILE } = require('./enums');
+const { env } = require('../config/index');
 
 // OpenAI setup
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: env.OPENAI_API_KEY,
 });
 
 // Keywords mapped to quick responses
@@ -60,7 +61,7 @@ const getContextPrefix = (type) => {
 // Main GPT handler
 const generateReply = async (
   userMessage,
-  coachType = 'savage',
+  coachType = 'echo',
   phase = 'during-fast'
 ) => {
   const quick = checkQuickReply(userMessage);
@@ -70,9 +71,8 @@ const generateReply = async (
     COACH_PROFILE[coachType.toLowerCase()] || COACH_PROFILE.savage;
 
   const contextPrefix = getContextPrefix(phase);
-  const systemPrompt = contextPrefix
-    ? `${contextPrefix} ${profile.systemPrompt}`
-    : profile.systemPrompt;
+  const systemPrompt =
+    `${contextPrefix} ${profile.systemPrompt} Respond in no more than 3 short sentences.`.trim();
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4',

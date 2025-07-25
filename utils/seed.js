@@ -1,31 +1,29 @@
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const bcrypt = require('bcryptjs');
-const User = require('../models/User');
-const PaymentPlan = require('../models/PaymentPlan');
-const Review = require('../models/Review');
+const { User, PaymentPlan, Review } = require('../models/index');
 const { USER_ROLES, PAYMENT_STATUS } = require('../utils/enums');
+const { env } = require('../config/index');
 
 dotenv.config();
 
 const seedAdmin = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(env.MONGO_URI);
     console.log('Connected to MongoDB......');
 
     // admin
     const existingAdmin = await User.findOne({
-      email: process.env.ADMIN_EMAIL,
+      email: env.ADMIN_EMAIL,
       role: USER_ROLES.ADMIN,
     });
 
     if (existingAdmin) {
       console.log('Admin already exists...');
     } else {
-      const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+      const hashedPassword = await bcrypt.hash(env.ADMIN_PASSWORD, 10);
       await User.create({
         name: 'Admin',
-        email: process.env.ADMIN_EMAIL,
+        email: env.ADMIN_EMAIL,
         password: hashedPassword,
         role: USER_ROLES.ADMIN,
       });

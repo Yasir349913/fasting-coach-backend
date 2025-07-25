@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { Unauthenticated } = require('../errors');
+const { env } = require('../config/index');
 
 // Middleware to verify JWT and extract user
 const authMiddleware = async (req, res, next) => {
@@ -12,7 +13,7 @@ const authMiddleware = async (req, res, next) => {
   const token = authHeader.split(' ')[1];
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, env.JWT_SECRET);
     req.user = {
       userId: payload.userId,
       role: payload.role,

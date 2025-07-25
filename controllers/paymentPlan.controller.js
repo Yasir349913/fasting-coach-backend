@@ -1,11 +1,27 @@
-const PaymentPlan = require('../models/PaymentPlan');
+const { PaymentPlan } = require('../models/index');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequest, NotFound } = require('../errors');
 
 // GET /v1/payment-plans
 const getPlans = async (req, res) => {
-  const plans = await PaymentPlan.find().sort({ createdAt: -1 });
-  res.status(StatusCodes.OK).json({ count: plans.length, plans });
+  const { billingType, isActive } = req.query;
+
+  const filter = {};
+
+  if (billingType) {
+    filter.billingType = billingType;
+  }
+
+  if (isActive !== undefined) {
+    filter.isActive = isActive === 'true';
+  }
+
+  const plans = await PaymentPlan.find(filter).sort({ createdAt: -1 });
+
+  res.status(StatusCodes.OK).json({
+    count: plans.length,
+    plans,
+  });
 };
 
 // POST /v1/payment-plans
