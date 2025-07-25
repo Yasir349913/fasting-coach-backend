@@ -5,7 +5,7 @@ const {
   updatePlan,
   deletePlan,
 } = require('../controllers/index');
-const { authMiddleware, adminOnly } = require('../middleware/auth');
+const { authMiddleware, adminOnly } = require('../middleware/index');
 
 const router = express.Router();
 

@@ -20,6 +20,18 @@ const UserSchema = mongoose.Schema(
       type: String,
       minlength: 6,
     },
+    phone: {
+      type: String,
+      unique: true,
+      validate: {
+        validator: function (v) {
+          return /^\+[1-9]\d{9,14}$/.test(v);
+        },
+        message:
+          'Please provide a valid phone number in E.164 format (e.g. +14155238886)',
+      },
+    },
+
     role: {
       type: String,
       enum: Object.values(USER_ROLES),
@@ -28,9 +40,11 @@ const UserSchema = mongoose.Schema(
     status: {
       type: String,
       enum: Object.values(PAYMENT_STATUS),
+      default: PAYMENT_STATUS.PENDING,
     },
-    is_subscribed: {
-      type: Boolean,
+    messages: {
+      type: [String],
+      default: [],
     },
   },
   {
