@@ -1,7 +1,9 @@
 const { User } = require('../models/index');
 const { USER_ROLES, PAYMENT_STATUS } = require('../utils/enums');
-const { BadRequest } = require('../errors');
+const { StatusCodes } = require('http-status-codes');
+const { BadRequest, NotFound } = require('../errors');
 
+// Add user (Create or Update if pending)
 const addUser = async (req, res) => {
   const { name, phone } = req.body;
 
@@ -9,31 +11,25 @@ const addUser = async (req, res) => {
     throw new BadRequest('Please provide name and phone number');
   }
 
-  const user = await User.findOne({ phone, role: USER_ROLES.USER });
+  const existingUser = await User.findOne({ phone, role: USER_ROLES.USER });
 
-  // Case 1: User exists and is already paid
-  if (user && user.status === PAYMENT_STATUS.PAID) {
+  // Case 1: Already paid
+  if (existingUser && existingUser.status === PAYMENT_STATUS.PAID) {
     throw new BadRequest('Phone number already exists');
   }
 
-  // Case 2: User exists but payment is pending – update name and return
-  if (user && user.status === PAYMENT_STATUS.PENDING) {
-    user.name = name;
-    await user.save();
+  // Case 2: Exists with pending status
+  if (existingUser && existingUser.status === PAYMENT_STATUS.PENDING) {
+    existingUser.name = name;
+    await existingUser.save();
 
-    return res.status(200).json({
+    return res.status(StatusCodes.OK).json({
       message: 'User already exists with pending status.',
-      user: {
-        _id: user._id,
-        name: user.name,
-        phone: user.phone,
-        status: user.status,
-        is_subscribed: user.is_subscribed,
-      },
+      user: formatUserResponse(existingUser),
     });
   }
 
-  // Case 3: New user – create one
+  // Case 3: New user
   const newUser = await User.create({
     name,
     phone,
@@ -42,16 +38,67 @@ const addUser = async (req, res) => {
     is_subscribed: false,
   });
 
-  return res.status(201).json({
+  res.status(StatusCodes.CREATED).json({
     message: 'User created successfully',
-    user: {
-      _id: newUser._id,
-      name: newUser.name,
-      phone: newUser.phone,
-      status: newUser.status,
-      is_subscribed: newUser.is_subscribed,
-    },
+    user: formatUserResponse(newUser),
   });
 };
 
-module.exports = { addUser };
+// Get all users with role "USER", with optional filters: status and is_subscribed
+const getUser = async (req, res) => {
+  try {
+    const { status, is_subscribed } = req.query;
+
+    const query = { role: USER_ROLES.USER };
+
+    if (status) query.status = status;
+    if (is_subscribed !== undefined)
+      query.is_subscribed = is_subscribed === 'true';
+
+    const users = await User.find(query);
+
+    res.status(StatusCodes.OK).json({ success: true, users });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Server error while fetching users.',
+    });
+  }
+};
+
+// Update only 'name', 'status', and 'is_subscribed' fields of user
+const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { name, status, is_subscribed } = req.body;
+
+  const updateData = {};
+  if (name) updateData.name = name;
+  if (status) updateData.status = status;
+  if (is_subscribed) updateData.is_subscribed = is_subscribed;
+
+  const user = await User.findByIdAndUpdate(id, updateData, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!user) {
+    throw new NotFound(`No user found with ID: ${id}`);
+  }
+
+  res.status(StatusCodes.OK).json({
+    message: 'User updated successfully',
+    user: formatUserResponse(user),
+  });
+};
+
+// Helper to format user response
+const formatUserResponse = (user) => ({
+  _id: user._id,
+  name: user.name,
+  phone: user.phone,
+  status: user.status,
+  is_subscribed: user.is_subscribed,
+});
+
+module.exports = { addUser, getUser, updateUser };

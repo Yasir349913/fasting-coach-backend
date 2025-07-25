@@ -12,7 +12,7 @@ const {
   deleteReview,
 } = require('./review.controller');
 const { handleIncomingMessage, sendQRCode } = require('./twillio.controller');
-const { addUser } = require('./user.controller');
+const { addUser, getUser, updateUser } = require('./user.controller');
 
 module.exports = {
   login,
@@ -27,4 +27,6 @@ module.exports = {
   handleIncomingMessage,
   sendQRCode,
   addUser,
+  getUser,
+  updateUser,
 };

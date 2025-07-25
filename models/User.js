@@ -31,7 +31,6 @@ const UserSchema = mongoose.Schema(
           'Please provide a valid phone number in E.164 format (e.g. +14155238886)',
       },
     },
-
     role: {
       type: String,
       enum: Object.values(USER_ROLES),
