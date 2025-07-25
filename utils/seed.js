@@ -4,8 +4,6 @@ const { User, PaymentPlan, Review } = require('../models/index');
 const { USER_ROLES, PAYMENT_STATUS } = require('../utils/enums');
 const { env } = require('../config/index');
 
-dotenv.config();
-
 const seedAdmin = async () => {
   try {
     await mongoose.connect(env.MONGO_URI);
