@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { Unauthenticated } = require('../errors');
-const { env } = require('../config/index');
+const { env } = require('../config');
 
 // Middleware to verify JWT and extract user
 const authMiddleware = async (req, res, next) => {

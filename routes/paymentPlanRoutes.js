@@ -1,11 +1,6 @@
 const express = require('express');
-const {
-  getPlans,
-  addPlan,
-  updatePlan,
-  deletePlan,
-} = require('../controllers/index');
-const { authMiddleware, adminOnly } = require('../middleware/index');
+const { getPlans, addPlan, updatePlan, deletePlan } = require('../controllers');
+const { authMiddleware, adminOnly } = require('../middleware');
 
 const router = express.Router();
 

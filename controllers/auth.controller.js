@@ -1,7 +1,7 @@
-const { User } = require('../models/index');
+const { User } = require('../models');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequest, Unauthenticated } = require('../errors');
-const { USER_ROLES } = require('../utils/enums');
+const { USER_ROLES } = require('../utils');
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -21,7 +21,16 @@ const login = async (req, res) => {
   }
 
   const token = user.createJWT();
-  res.status(StatusCodes.OK).json({ user, accessToken: token });
+
+  const userObj = user.toObject();
+  delete userObj.password;
+  delete userObj.status;
+  delete userObj.message;
+
+  res.status(StatusCodes.OK).json({
+    user: userObj,
+    accessToken: token,
+  });
 };
 
 module.exports = { login };

@@ -1,4 +1,4 @@
-const { Review } = require('../models/index');
+const { Review } = require('../models');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequest, NotFound } = require('../errors');
 

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { PRICING_TYPE } = require('../utils/enums');
+const { PRICING_TYPE } = require('../utils');
 
 const PaymentPlanSchema = new mongoose.Schema(
   {

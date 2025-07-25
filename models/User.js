@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
-const { PAYMENT_STATUS, USER_ROLES } = require('../utils/enums');
+const { PAYMENT_STATUS, USER_ROLES } = require('../utils');
 
 const UserSchema = mongoose.Schema(
   {

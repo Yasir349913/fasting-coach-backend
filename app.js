@@ -1,8 +1,7 @@
 const cors = require('cors');
 const morgan = require('morgan');
 const express = require('express');
-const { connectDb, env } = require('./config/index');
-const routes = require('./routes/index');
+const routes = require('./routes');
 
 const app = express();
 

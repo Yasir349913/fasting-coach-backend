@@ -1,4 +1,4 @@
-const { PaymentPlan } = require('../models/index');
+const { PaymentPlan } = require('../models');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequest, NotFound } = require('../errors');
 

@@ -4,8 +4,8 @@ const {
   addReview,
   updateReview,
   deleteReview,
-} = require('../controllers/index');
-const { authMiddleware, adminOnly } = require('../middleware/index');
+} = require('../controllers');
+const { authMiddleware, adminOnly } = require('../middleware');
 
 const router = express.Router();
 

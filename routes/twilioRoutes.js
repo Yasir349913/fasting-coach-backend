@@ -1,7 +1,9 @@
 const express = require('express');
-const { handleIncomingMessage, sendQRCode } = require('../controllers/index');
+const { subscribeOnly } = require('../middleware');
+const { handleIncomingMessage, sendQRCode } = require('../controllers');
 const router = express.Router();
 
+router.use(subscribeOnly);
 router.route('/webhook').post(handleIncomingMessage);
 router.route('/qr').get(sendQRCode);
 

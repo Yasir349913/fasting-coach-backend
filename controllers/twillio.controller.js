@@ -1,7 +1,7 @@
-const { generateReply } = require('../utils/gptClient');
-const { twilioClient } = require('../config/twillo');
+const { generateReply } = require('../utils');
+const { twilioClient } = require('../config');
 const QRCode = require('qrcode');
-const { env } = require('../config/index');
+const { env } = require('../config');
 
 const handleIncomingMessage = async (req, res) => {
   const from = req.body.From;

@@ -1,5 +1,5 @@
-const { User } = require('../models/index');
-const { USER_ROLES, PAYMENT_STATUS } = require('../utils/enums');
+const { User } = require('../models');
+const { USER_ROLES, PAYMENT_STATUS } = require('../utils');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequest, NotFound } = require('../errors');
 
@@ -44,7 +44,7 @@ const addUser = async (req, res) => {
   });
 };
 
-// Get all users with role "USER", with optional filters: status and is_subscribed
+// Get all users with role "USER
 const getUser = async (req, res) => {
   try {
     const { status, is_subscribed } = req.query;
@@ -70,12 +70,11 @@ const getUser = async (req, res) => {
 // Update only 'name', 'status', and 'is_subscribed' fields of user
 const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, status, is_subscribed } = req.body;
+  const { name, status } = req.body;
 
   const updateData = {};
   if (name) updateData.name = name;
   if (status) updateData.status = status;
-  if (is_subscribed) updateData.is_subscribed = is_subscribed;
 
   const user = await User.findByIdAndUpdate(id, updateData, {
     new: true,
@@ -98,7 +97,6 @@ const formatUserResponse = (user) => ({
   name: user.name,
   phone: user.phone,
   status: user.status,
-  is_subscribed: user.is_subscribed,
 });
 
 module.exports = { addUser, getUser, updateUser };
