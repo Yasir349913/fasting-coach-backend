@@ -10,6 +10,7 @@ const requiredEnvVars = [
   'TWILIO_SID',
   'TWILIO_AUTH_TOKEN',
   'TWILIO_WHATSAPP_NUMBER',
+  'TWILIO_JOIN_CODE',
 ];
 
 requiredEnvVars.forEach((key) => {
@@ -29,6 +30,7 @@ const env = {
   TWILIO_WHATSAPP_NUMBER: process.env.TWILIO_WHATSAPP_NUMBER,
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
   ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+  TWILIO_JOIN_CODE: process.env.TWILIO_JOIN_CODE,
 };
 
 module.exports = { env };

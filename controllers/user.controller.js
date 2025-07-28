@@ -1,10 +1,68 @@
 const { User } = require('../models');
 const { USER_ROLES, PAYMENT_STATUS } = require('../utils');
+const { twilioClient } = require('../config');
+const { env } = require('../config');
 const { StatusCodes } = require('http-status-codes');
 const { BadRequest, NotFound } = require('../errors');
 
+const registerUserToTwilio = async (name, phone) => {
+  const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+  const instructionText = `Send "join thee-bear" to ${env.TWILIO_WHATSAPP_NUMBER} to receive messages`;
+
+  try {
+    // Try registering user in Twilio Conversations
+    try {
+      const user = await twilioClient.conversations.v1.users.create({
+        identity: formattedPhone,
+        friendlyName: name,
+        attributes: JSON.stringify({
+          name,
+          phone: formattedPhone,
+          registeredAt: new Date().toISOString(),
+          platform: 'whatsapp',
+          sandboxJoined: false,
+          instructions: instructionText,
+        }),
+      });
+
+      console.log('✅ User added to Twilio Conversations:', user.identity);
+      console.log('📋 Instructions:', instructionText);
+
+      return {
+        conversationUserSid: user.sid,
+        identity: user.identity,
+        registered: true,
+        sandboxJoined: false,
+        instructions: instructionText,
+      };
+    } catch (conversationError) {
+      console.warn(
+        '⚠️ Twilio Conversations not available. Falling back to local registration.'
+      );
+    }
+  } catch (error) {
+    console.error('❌ Error registering user to Twilio:', error.message);
+  }
+
+  // Fallback registration (executed if Conversations fails or outer error occurs)
+  console.log(`📝 User registered locally: ${name} - ${formattedPhone}`);
+  console.log('📋 Instructions:', instructionText);
+
+  return {
+    name,
+    phone: formattedPhone,
+    registered: true,
+    sandboxJoined: false,
+    platform: 'whatsapp_sandbox',
+    instructions: instructionText,
+    timestamp: new Date(),
+  };
+};
+
 // Add user (Create or Update if pending)
 const addUser = async (req, res) => {
+  console.log(req.body);
+
   const { name, phone } = req.body;
 
   if (!name || !phone) {
@@ -23,6 +81,18 @@ const addUser = async (req, res) => {
     existingUser.name = name;
     await existingUser.save();
 
+    // Register to Twilio when updating from pending to active
+    try {
+      await registerUserToTwilio(name, phone);
+      console.log('User registered to Twilio system');
+    } catch (twilioError) {
+      console.error(
+        'Twilio registration failed but user was updated:',
+        twilioError
+      );
+      // Continue without throwing error since the main operation (user update) succeeded
+    }
+
     return res.status(StatusCodes.OK).json({
       message: 'User already exists with pending status.',
       user: formatUserResponse(existingUser),
@@ -34,9 +104,22 @@ const addUser = async (req, res) => {
     name,
     phone,
     role: USER_ROLES.USER,
-    status: PAYMENT_STATUS.PENDING,
-    is_subscribed: false,
+    status: PAYMENT_STATUS.PAID,
   });
+
+  // Register user to Twilio after successful database creation
+  try {
+    await registerUserToTwilio(name, phone);
+    console.log(
+      'User successfully added to both database and registered for Twilio'
+    );
+  } catch (twilioError) {
+    console.error(
+      'User created in database but Twilio registration failed:',
+      twilioError
+    );
+    // Continue without throwing error since the main operation (user creation) succeeded
+  }
 
   res.status(StatusCodes.CREATED).json({
     message: 'User created successfully',
@@ -44,7 +127,7 @@ const addUser = async (req, res) => {
   });
 };
 
-// Get all users with role "USER
+// Get all users with role "USER"
 const getUser = async (req, res) => {
   try {
     const { status, is_subscribed } = req.query;
@@ -83,6 +166,19 @@ const updateUser = async (req, res) => {
 
   if (!user) {
     throw new NotFound(`No user found with ID: ${id}`);
+  }
+
+  // If status is being updated to PAID, register user to Twilio
+  if (status === PAYMENT_STATUS.PAID) {
+    try {
+      await registerUserToTwilio(user.name, user.phone);
+      console.log('Updated user registered to Twilio system');
+    } catch (twilioError) {
+      console.error(
+        'Failed to register updated user with Twilio:',
+        twilioError
+      );
+    }
   }
 
   res.status(StatusCodes.OK).json({

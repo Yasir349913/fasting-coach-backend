@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.use(subscribeOnly);
 router.route('/webhook').post(handleIncomingMessage);
-router.route('/qr').get(sendQRCode);
+router.route('/qr').post(sendQRCode);
 
 module.exports = router;

@@ -12,13 +12,13 @@ const handleIncomingMessage = async (req, res) => {
 
   try {
     const airesponse = await generateReply(body);
-    // const response = await twilioClient.messages.create({
-    //   from: process.env.TWILIO_WHATSAPP_NUMBER,
-    //   to: from,
-    //   body: airesponse,
-    // });
+    const response = await twilioClient.messages.create({
+      from: process.env.TWILIO_WHATSAPP_NUMBER,
+      to: from,
+      body: airesponse,
+    });
 
-    res.status(200).json({ airesponse });
+    res.status(200).json({ response });
   } catch (error) {
     console.error('Twilio send error:', error.message);
     res.status(500).send('Error sending message');
@@ -28,20 +28,22 @@ const handleIncomingMessage = async (req, res) => {
 const sendQRCode = async (req, res) => {
   try {
     const twilioNumber = env.TWILIO_WHATSAPP_NUMBER.replace('whatsapp:', '');
-    const message = encodeURIComponent('Hi, I want to start fasting 💪');
-    const waLink = `https://wa.me/${twilioNumber}?text=${message}`;
+    const joinCode = `join ${env.TWILIO_JOIN_CODE}`;
+    const encodedMessage = encodeURIComponent(joinCode);
+    const waLink = `https://wa.me/${twilioNumber}?text=${encodedMessage}`;
+
     const qrDataUrl = await QRCode.toDataURL(waLink);
 
-    // return an image (base64 format)
     const img = Buffer.from(qrDataUrl.split(',')[1], 'base64');
+
     res.writeHead(200, {
       'Content-Type': 'image/png',
       'Content-Length': img.length,
     });
     res.end(img);
   } catch (error) {
-    console.error('QR Code Generation Error:', err);
-    res.status(500).json({ error: 'Failed to generate QR code' });
+    console.error('QR Code Generation Error:', error);
+    res.status(500).json({ error: 'Failed to generate WhatsApp QR code' });
   }
 };
 

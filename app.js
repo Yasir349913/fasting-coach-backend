@@ -7,8 +7,8 @@ const app = express();
 
 // Middlewares
 app.use(morgan('tiny'));
-app.use('/webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: '*',
@@ -19,6 +19,7 @@ app.use(
 app.get('/', (req, res) => {
   res.send('Fasting Coach Backend Running...');
 });
+
 app.use('/v1', routes);
 
 module.exports = app;
